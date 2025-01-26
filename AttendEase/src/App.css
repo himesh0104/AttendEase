@@ -1,0 +1,17 @@
+/* App.css - Custom styles, Tailwind will handle most of the styling */
+
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  a {
+    text-decoration: none;
+  }
+  
+  .container {
+    padding: 1rem;
+  }
+  

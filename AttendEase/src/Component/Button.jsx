@@ -1,11 +1,12 @@
-import React from "react";
+import React from 'react';
 
-const Button = ({ label, onClick, variant = "primary" }) => {
-  const baseClass = "px-6 py-3 rounded-lg font-bold ";
-  const variantClass = variant === "primary" ? "bg-[#1980e6] text-white" : "bg-[#243647] text-white";
-
+const Button = ({ label, onClick, type = 'button' }) => {
   return (
-    <button onClick={onClick} className={`${baseClass} ${variantClass}`}>
+    <button
+      className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-600"
+      type={type}
+      onClick={onClick}
+    >
       {label}
     </button>
   );

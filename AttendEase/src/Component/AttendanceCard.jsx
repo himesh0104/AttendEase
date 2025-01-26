@@ -1,10 +1,10 @@
-import React from "react";
+import React from 'react';
 
-const AttendanceCard = ({ title, percentage }) => {
+const AttendanceCard = ({ subject, attendance }) => {
   return (
-    <div className="flex justify-between items-center bg-[#111418] p-4 rounded-lg border border-[#293038]">
-      <p className="text-white font-bold">{title}</p>
-      <p className="text-white">{percentage}%</p>
+    <div className="border rounded-lg p-4 shadow-md bg-white">
+      <h3 className="text-lg font-semibold">{subject}</h3>
+      <p className="text-sm">Attendance: {attendance}%</p>
     </div>
   );
 };
