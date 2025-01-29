@@ -1,7 +1,29 @@
 {
+  "name": "attendease",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/himesh0104/Attendease1#readme",
+  "bugs": {
+    "url": "https://github.com/himesh0104/Attendease1/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/himesh0104/Attendease1.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "tailwind.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.0.0",
+    "@tailwindcss/vite": "^4.0.0"
+  },
   "devDependencies": {
     "autoprefixer": "^10.4.20",
     "postcss": "^8.5.1",
-    "tailwindcss": "^4.0.0"
+    "tailwindcss": "^3.4.17"
   }
 }
