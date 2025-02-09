@@ -127,15 +127,16 @@ const LoginPage = ({ userType }) => {
           </form>
         </div>
 
-        {/* Footer */}
-        <div className="text-center">
+        
+{/* Footer */}
+<div className="text-center">
           <Link
             to="/signup"
             className="text-purple-200 hover:text-white transition-colors duration-200 inline-flex items-center gap-1 group"
           >
-            New to AttendEase?{" "}
+            {" "}
             <span className="font-semibold group-hover:translate-x-0.5 transition-transform duration-200">
-              Create account
+            
             </span>
           </Link>
         </div>
@@ -143,5 +144,4 @@ const LoginPage = ({ userType }) => {
     </div>
   );
 };
-
 export default LoginPage;
