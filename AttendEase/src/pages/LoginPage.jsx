@@ -17,14 +17,12 @@ const LoginPage = ({ userType = "Student" }) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      // Navigate based on userType
+      await new Promise((resolve) => setTimeout(resolve, 1500));  // Simulate API request
+  
       if (userType.toLowerCase() === "student") {
         navigate("/student-dashboard");
-      } else if (userType.toLowerCase() === "teacher") {
-        navigate("/teacher-dashboard");
+      } else if (userType.toLowerCase() === "faculty") {  // Ensure case matches "Faculty"
+        navigate("/faculty-dashboard");  // Redirect Faculty to Dashboard
       } else if (userType.toLowerCase() === "admin") {
         navigate("/admin-dashboard");
       }
