@@ -90,9 +90,6 @@ export default function HomePage() {
               </span>
             </span>
           </Link>
-          <Link to="/forgot-password" className="text-purple-200/80 hover:text-white block transition-colors duration-300">
-            Forgot password?
-          </Link>
         </div>
 
         {/* Footer with gradient text */}

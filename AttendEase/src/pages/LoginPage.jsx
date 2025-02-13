@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@/components/button";
-import { Input } from "@/components/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ArrowLeft, User, KeyRound, Loader2, Eye, EyeOff } from "lucide-react";
 
-const LoginPage = ({ userType }) => {
+const LoginPage = ({ userType = "Student" }) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -17,19 +17,28 @@ const LoginPage = ({ userType }) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      // Add your login logic here
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulated API call
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      
+      // Navigate based on userType
+      if (userType.toLowerCase() === "student") {
+        navigate("/student-dashboard");
+      } else if (userType.toLowerCase() === "teacher") {
+        navigate("/teacher-dashboard");
+      } else if (userType.toLowerCase() === "admin") {
+        navigate("/admin-dashboard");
+      }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 flex items-center justify-center p-6 relative">
-      {/* Background animation effect */}
-      <div className="absolute inset-0 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 flex items-center justify-center p-6">
+      {/* Animated background dots */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 opacity-20">
           {[...Array(20)].map((_, i) => (
             <div
@@ -45,12 +54,12 @@ const LoginPage = ({ userType }) => {
         </div>
       </div>
 
-      <div className="w-full max-w-md space-y-8">
-        {/* Header Section */}
-        <div className="bg-white/10 p-8 rounded-2xl backdrop-blur-sm space-y-6">
+      <div className="w-full max-w-md space-y-8 relative">
+        {/* Main content card */}
+        <div className="bg-white/10 p-8 rounded-2xl backdrop-blur-sm border border-white/10 shadow-xl space-y-6">
           <div className="flex flex-col space-y-6">
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => navigate("/")}
               className="text-white/80 hover:text-white transition-colors duration-200 flex items-center gap-2 group w-fit"
             >
               <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform duration-200" />
@@ -67,7 +76,6 @@ const LoginPage = ({ userType }) => {
             </div>
           </div>
 
-          {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
               <div className="relative group">
@@ -77,6 +85,7 @@ const LoginPage = ({ userType }) => {
                   value={formData.id}
                   onChange={(e) => setFormData({ ...formData, id: e.target.value })}
                   className="w-full pl-12 pr-4 py-3 bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-purple-400 focus:ring-purple-400 transition-all duration-200"
+                  required
                 />
                 <User className="absolute left-4 top-3.5 h-5 w-5 text-white/50 group-focus-within:text-purple-400 transition-colors duration-200" />
               </div>
@@ -88,6 +97,7 @@ const LoginPage = ({ userType }) => {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   className="w-full pl-12 pr-12 py-3 bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-purple-400 focus:ring-purple-400 transition-all duration-200"
+                  required
                 />
                 <KeyRound className="absolute left-4 top-3.5 h-5 w-5 text-white/50 group-focus-within:text-purple-400 transition-colors duration-200" />
                 <button
@@ -106,7 +116,7 @@ const LoginPage = ({ userType }) => {
 
             <div className="flex items-center justify-between">
               <Link 
-                to="/forgot-password" 
+                to="/forgot-password"
                 className="text-sm text-purple-200 hover:text-white transition-colors duration-200"
               >
                 Forgot password?
@@ -127,21 +137,21 @@ const LoginPage = ({ userType }) => {
           </form>
         </div>
 
-        
-{/* Footer */}
-<div className="text-center">
-          <Link
-            to="/signup"
-            className="text-purple-200 hover:text-white transition-colors duration-200 inline-flex items-center gap-1 group"
-          >
-            {" "}
-            <span className="font-semibold group-hover:translate-x-0.5 transition-transform duration-200">
-            
-            </span>
-          </Link>
+        {/* Sign up link */}
+        <div className="text-center">
+          <p className="text-white/80">
+            Don't have an account?{" "}
+            <Link
+              to="/signup"
+              className="text-purple-200 hover:text-white transition-colors duration-200 font-semibold"
+            >
+              Sign up
+            </Link>
+          </p>
         </div>
       </div>
     </div>
   );
 };
+
 export default LoginPage;
