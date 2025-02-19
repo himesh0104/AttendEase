@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,10 +9,40 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum Role {
+  STUDENT
+  FACULTY
+}
+
 model User {
-  id       Int    @id @default(autoincrement())
-  name     String
-  email    String @unique
-  password String
+  id        String  @id @default(uuid())  
+  name      String
+  email     String  @unique
+  password  String
+  role      Role    @default(STUDENT)
   createdAt DateTime @default(now())
+
+  // Relations
+  attendances Attendance[]
+  qrCodes     QRCode[] @relation("FacultyQRCode")
+}
+
+model Attendance {
+  id        String   @id @default(uuid())  
+  student   User     @relation(fields: [studentId], references: [id])
+  studentId String
+  qrCode    QRCode   @relation(fields: [qrCodeId], references: [id])
+  qrCodeId  String
+  timestamp DateTime @default(now())
+}
+
+model QRCode {
+  id         String   @id @default(uuid())  
+  faculty    User     @relation(fields: [facultyId], references: [id], name: "FacultyQRCode")
+  facultyId  String
+  createdAt  DateTime @default(now())
+
+  // Relations
+  attendances Attendance[]
 }
