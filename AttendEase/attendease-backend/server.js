@@ -1,13 +1,12 @@
-require('dotenv').config();
-const mongoose = require('mongoose');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
-const MONGO_URI = process.env.MONGO_URI;
-
-if (!MONGO_URI) {
-    console.error("❌ MongoDB URI is missing. Check your .env file.");
-    process.exit(1);
+async function main() {
+  await prisma.$connect();
+  console.log("✅ Connected to PostgreSQL!");
 }
 
-mongoose.connect(MONGO_URI)
-    .then(() => console.log("✅ MongoDB Connected"))
-    .catch(err => console.error("❌ MongoDB Connection Error:", err));
+main().catch((e) => {
+  console.error("❌ Error connecting to database:", e);
+  process.exit(1);
+});
