@@ -7,12 +7,14 @@ const { authenticateToken, authorizeRole } = require("../middleware/authMiddlewa
 const prisma = new PrismaClient();
 const router = express.Router();
 
-// Signup Route
+/**
+ * ✅ User Signup (Faculty/Student)
+ */
 router.post("/signup", async (req, res) => {
   const { name, email, password, role } = req.body;
 
   try {
-    // Check if user exists
+    // Check if user already exists
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       return res.status(400).json({ success: false, msg: "User already exists" });
@@ -21,7 +23,7 @@ router.post("/signup", async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
+    // Create user in database
     const user = await prisma.user.create({
       data: { name, email, password: hashedPassword, role },
     });
@@ -30,29 +32,29 @@ router.post("/signup", async (req, res) => {
   } catch (err) {
     console.error("Signup Error:", err);
     res.status(500).json({ success: false, msg: "Internal Server Error" });
-  } finally {
-    await prisma.$disconnect();
   }
 });
 
-// Login Route
+/**
+ * ✅ User Login (Faculty/Student)
+ */
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Check if user exists
+    // Find user in database
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       return res.status(400).json({ success: false, msg: "Invalid email or password" });
     }
 
-    // Compare passwords
+    // Verify password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ success: false, msg: "Invalid email or password" });
     }
 
-    // Generate JWT Token
+    // Generate JWT token
     const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
@@ -61,12 +63,12 @@ router.post("/login", async (req, res) => {
   } catch (err) {
     console.error("Login Error:", err);
     res.status(500).json({ success: false, msg: "Internal Server Error" });
-  } finally {
-    await prisma.$disconnect();
   }
 });
 
-// Protected Route
+/**
+ * ✅ Protected Route - Accessible to Any Authenticated User
+ */
 router.get("/protected", authenticateToken, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.user.id } });
@@ -78,24 +80,26 @@ router.get("/protected", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error("Protected Route Error:", err);
     res.status(500).json({ success: false, msg: "Internal Server Error" });
-  } finally {
-    await prisma.$disconnect();
   }
 });
 
-// Example: Admin-only route
-router.get("/admin", authenticateToken, authorizeRole("admin"), async (req, res) => {
-  res.json({ success: true, msg: "Welcome, Admin!" });
-});
-
-router.post("/faculty-dashboard", authenticateToken, async (req, res) => {
+/**
+ * ✅ Faculty-Only Route
+ */
+router.get("/faculty-dashboard", authenticateToken, authorizeRole("FACULTY"), async (req, res) => {
   try {
-    // Sample response, update with actual logic
-    res.json({ message: "Welcome to Faculty Dashboard" });
+    res.json({ success: true, msg: "Welcome to Faculty Dashboard" });
   } catch (error) {
     console.error("Faculty Dashboard Error:", error);
-    res.status(500).json({ msg: "Server Error" });
+    res.status(500).json({ success: false, msg: "Server Error" });
   }
+});
+
+/**
+ * ✅ Admin-Only Route
+ */
+router.get("/admin", authenticateToken, authorizeRole("ADMIN"), async (req, res) => {
+  res.json({ success: true, msg: "Welcome, Admin!" });
 });
 
 module.exports = router;
