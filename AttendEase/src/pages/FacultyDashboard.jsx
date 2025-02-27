@@ -1,5 +1,5 @@
 import React from "react";
-import Dashboard from "../components/Dashboard";
+import Dashboard from "../pages/Dashboard";
 
 const FacultyDashboard = () => {
   return <Dashboard userRole="FACULTY" />;
