@@ -10,12 +10,9 @@ const register = async (req, res) => {
     const { name, email, password, role } = req.body;
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
-
+    const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({ success: false, message: "User already exists" });
     }
 
     // Hash password
@@ -27,13 +24,14 @@ const register = async (req, res) => {
         name,
         email,
         password: hashedPassword,
-        role, // "student" or "faculty"
+        role,
       },
     });
 
-    res.status(201).json({ message: "User registered successfully", user });
+    res.status(201).json({ success: true, message: "User registered successfully", user });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    console.error("Registration Error:", error);
+    res.status(500).json({ success: false, message: "Server error. Please try again later." });
   }
 };
 
@@ -43,18 +41,15 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     // Find user in database
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
-
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 
     // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 
     // Generate JWT Token
@@ -62,9 +57,19 @@ const login = async (req, res) => {
       expiresIn: "7d",
     });
 
-    res.status(200).json({ message: "Login successful", token, user });
+    res.status(200).json({
+      success: true,
+      message: "Login successful",
+      token,
+      user: {
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    console.error("Login Error:", error);
+    res.status(500).json({ success: false, message: "Server error. Please try again later." });
   }
 };
 

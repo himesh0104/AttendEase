@@ -87,9 +87,30 @@ export default function SignupPage() {
 
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      navigate("/student-dashboard");
+      const response = await fetch("http://localhost:5000/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+          role: formData.role.toUpperCase(),
+          department: formData.department
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        localStorage.setItem("user", JSON.stringify({
+          name: formData.fullName,
+          role: formData.role.toUpperCase(),
+          department: formData.department
+        }));
+        localStorage.setItem("token", data.token);
+        navigate(formData.role === "faculty" ? "/faculty-dashboard" : "/student-dashboard");
+      } else {
+        alert(data.msg);
+      }
     } catch (error) {
       console.error("Signup error:", error);
     } finally {
