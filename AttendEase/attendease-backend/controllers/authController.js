@@ -20,12 +20,7 @@ const register = async (req, res) => {
 
     // Create new user
     const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        role,
-      },
+      data: { name, email, password: hashedPassword, role },
     });
 
     res.status(201).json({ success: true, message: "User registered successfully", user });
@@ -43,13 +38,13 @@ const login = async (req, res) => {
     // Find user in database
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return res.status(401).json({ success: false, message: "Invalid credentials" });
+      return res.status(401).json({ success: false, message: "Invalid email or password" });
     }
 
     // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: "Invalid credentials" });
+      return res.status(401).json({ success: false, message: "Invalid email or password" });
     }
 
     // Generate JWT Token
@@ -61,11 +56,7 @@ const login = async (req, res) => {
       success: true,
       message: "Login successful",
       token,
-      user: {
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
+      user: { name: user.name, email: user.email, role: user.role },
     });
   } catch (error) {
     console.error("Login Error:", error);

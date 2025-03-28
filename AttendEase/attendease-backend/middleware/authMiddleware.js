@@ -1,5 +1,6 @@
-const jwt = require("jsonwebtoken");
-require("dotenv").config();
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.header("Authorization");
@@ -30,4 +31,5 @@ const authorizeRole = (...roles) => (req, res, next) => {
   next();
 };
 
-module.exports = { authenticateToken, authorizeRole };
+// ✅ Named exports
+export { authenticateToken, authorizeRole };

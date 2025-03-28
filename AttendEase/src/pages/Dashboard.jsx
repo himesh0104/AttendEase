@@ -1,105 +1,65 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle, Camera } from "lucide-react";
+import StudentDashboard from "./StudentDashboard";
+import FacultyDashboard from "./FacultyDashboard";
 
-const Dashboard = ({ userRole }) => {
+const Dashboard = () => {
   const navigate = useNavigate();
-  const [scanning, setScanning] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
+    const fetchUserRole = async () => {
+      const token = localStorage.getItem("token");
 
-    if (!token || !storedUser) {
-      navigate("/login"); // Redirect if not logged in
-      return;
-    }
-
-    try {
-      const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);
-
-      if (parsedUser?.role !== userRole) {
-        alert("Unauthorized Access");
-        navigate("/login");
+      if (!token) {
+        navigate("/");
+        return;
       }
-    } catch (error) {
-      console.error("Error parsing user data:", error);
-      localStorage.removeItem("user"); // Clear invalid data
-      navigate("/login");
-    }
-  }, [navigate, userRole]);
 
-  const toggleScanner = () => {
-    setScanning(!scanning);
-    if (scanning) {
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
-    }
-  };
+      try {
+        const response = await fetch("http://localhost:5000/api/auth/me", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-blue-900 text-white p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {showSuccess && (
-          <Alert className="bg-green-500/20 border-green-500/50 text-green-300">
-            <CheckCircle className="h-4 w-4" />
-            <AlertDescription>Attendance marked successfully!</AlertDescription>
-          </Alert>
-        )}
+        const data = await response.json();
+        if (!data.success) {
+          throw new Error(data.msg);
+        }
 
-        <Card className="bg-white/5 backdrop-blur-lg border-white/10">
-          <CardContent className="pt-6">
-            <h1 className="text-2xl font-bold">
-              Welcome, {user?.name ? user.name : "Guest"}
-            </h1>
-            <p className="text-purple-200">Role: {user?.role || "Unknown"}</p>
-          </CardContent>
-        </Card>
+        setUserRole(data.user.role);
+      } catch (error) {
+        console.error("Error fetching user role:", error);
+        localStorage.removeItem("token");
+        navigate("/");
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-        {userRole === "STUDENT" ? (
-          <Card className="bg-white/5 backdrop-blur-lg border-white/10">
-            <CardContent className="pt-6 text-center">
-              {scanning ? (
-                <div className="w-full aspect-square bg-purple-900/30 rounded-lg flex items-center justify-center">
-                  <div className="text-center">
-                    <Camera size={48} className="mx-auto mb-2 text-purple-300" />
-                    <button
-                      className="bg-red-500/80 hover:bg-red-600/80 text-white px-4 py-2 rounded"
-                      onClick={toggleScanner}
-                    >
-                      Stop Scanning
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <button
-                  className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2"
-                  onClick={toggleScanner}
-                >
-                  <Camera size={24} />
-                  Scan QR Code
-                </button>
-              )}
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="bg-white/5 backdrop-blur-lg border-white/10">
-            <CardContent className="pt-6">
-              <button
-                onClick={() => navigate("/qr-generator")}
-                className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 px-4 py-2 rounded-lg flex items-center gap-2"
-              >
-                Generate QR Code
-              </button>
-            </CardContent>
-          </Card>
-        )}
+    fetchUserRole();
+  }, [navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-purple-800 to-blue-900">
+        <div className="text-white text-2xl">Loading...</div>
       </div>
+    );
+  }
+
+  // Render the appropriate dashboard based on user role
+  return userRole === "STUDENT" ? (
+    <StudentDashboard />
+  ) : userRole === "FACULTY" ? (
+    <FacultyDashboard />
+  ) : (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-purple-800 to-blue-900">
+      <div className="text-white text-2xl">Unauthorized Access</div>
     </div>
   );
 };

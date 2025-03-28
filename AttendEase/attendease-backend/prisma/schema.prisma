@@ -46,3 +46,12 @@ model QRCode {
   // Relations
   attendances Attendance[]
 }
+
+model Session {
+  id           String  @id @default(uuid())
+  facultyId    String
+  courseId     String
+  sessionTime  DateTime
+  sessionToken String @unique
+  status       String
+}
