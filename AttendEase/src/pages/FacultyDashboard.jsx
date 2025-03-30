@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { QrCode, Plus } from "lucide-react";
+import { QrCode, Plus, LogOut } from "lucide-react";
 
 const FacultyDashboard = () => {
   const navigate = useNavigate();
@@ -48,7 +48,7 @@ const FacultyDashboard = () => {
         });
 
         const classesData = await classesResponse.json();
-        setClasses(classesData.classes);
+        setClasses(classesData);
       } catch (error) {
         console.error("Error fetching user or classes:", error);
         localStorage.removeItem("token");
@@ -59,15 +59,30 @@ const FacultyDashboard = () => {
     fetchUser();
   }, [navigate]);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-blue-900 text-white p-6">
       <div className="max-w-6xl mx-auto space-y-6">
-        <Card className="bg-white/5 backdrop-blur-lg border-white/10">
-          <CardContent className="pt-6">
-            <h1 className="text-2xl font-bold">Welcome, {user?.name || "Faculty"}</h1>
-            <p className="text-purple-200">Role: {user?.role || "Unknown"}</p>
-          </CardContent>
-        </Card>
+        <div className="flex justify-between items-center">
+          <Card className="bg-white/5 backdrop-blur-lg border-white/10 flex-1">
+            <CardContent className="pt-6">
+              <h1 className="text-2xl font-bold">Welcome, {user?.name || "Faculty"}</h1>
+              <p className="text-purple-200">Role: {user?.role || "Unknown"}</p>
+            </CardContent>
+          </Card>
+          
+          <button
+            className="ml-4 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white px-4 py-3 rounded-lg flex items-center justify-center gap-2"
+            onClick={handleLogout}
+          >
+            <LogOut size={20} />
+            Logout
+          </button>
+        </div>
 
         <Card className="bg-white/5 backdrop-blur-lg border-white/10">
           <CardContent className="pt-6">

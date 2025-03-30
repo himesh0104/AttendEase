@@ -55,3 +55,9 @@ model Session {
   sessionToken String @unique
   status       String
 }
+
+model Class {
+  id        String  @id @default(uuid())
+  name      String
+  facultyId String
+}

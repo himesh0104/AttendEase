@@ -1,9 +1,9 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-
 import authRoutes from "./routes/authRoutes.js";
 import qrcodeRoutes from "./routes/qrcode.js";
+import classRoutes from "./routes/classRoutes.js";
 import { authenticateToken } from "./middleware/authMiddleware.js";
 
 dotenv.config(); // ✅ Load environment variables
@@ -18,6 +18,7 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 // ✅ Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/qrcode", qrcodeRoutes);
+app.use("/api/classes", classRoutes);
 
 // ✅ Health check endpoint
 app.get("/", (req, res) => {
@@ -32,4 +33,3 @@ app.get("/api/protected", authenticateToken, (req, res) => {
 // ✅ Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-

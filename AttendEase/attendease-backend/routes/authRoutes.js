@@ -67,6 +67,17 @@ router.get("/protected", authenticateToken, async (req, res) => {
   }
 });
 
+// ✅ Fetch all classes
+router.get("/", async (req, res) => {
+  try {
+    const classes = await prisma.class.findMany();
+    res.json(classes);
+  } catch (error) {
+    console.error("❌ Error fetching classes:", error);
+    res.status(500).json({ error: "Failed to fetch classes" });
+  }
+});
+
 // ✅ Faculty-only Route
 router.get("/faculty-dashboard", authenticateToken, authorizeRole("FACULTY"), (req, res) => {
   res.json({ success: true, msg: "Welcome to Faculty Dashboard" });
