@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom'; // to get classId from route
 import { QrCode, Copy, Download, Clock, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { QRCodeCanvas } from 'qrcode.react';
 
 const QRGenerator = () => {
+  const { classId } = useParams();
   const [selectedClass, setSelectedClass] = useState(null);
   const [duration, setDuration] = useState(15);
 
@@ -11,6 +14,13 @@ const QRGenerator = () => {
     { id: 2, name: "CSE102 - Data Structures", time: "11:00 AM", room: "302" },
     { id: 3, name: "CSE103 - Database Systems", time: "02:00 PM", room: "303" }
   ];
+
+  useEffect(() => {
+    if (classId) {
+      const cls = classes.find(c => c.id === parseInt(classId));
+      if (cls) setSelectedClass(cls);
+    }
+  }, [classId]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-blue-900 text-white p-6">
@@ -21,30 +31,33 @@ const QRGenerator = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              <div className="space-y-4">
-                <label className="text-purple-200">Select Class</label>
-                <div className="grid gap-4">
-                  {classes.map((cls) => (
-                    <button
-                      key={cls.id}
-                      className={`p-4 rounded-lg flex items-center justify-between ${
-                        selectedClass?.id === cls.id 
-                          ? 'bg-gradient-to-r from-purple-500 to-blue-500'
-                          : 'bg-purple-900/30 hover:bg-purple-800/30'
-                      } transition-colors`}
-                      onClick={() => setSelectedClass(cls)}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Calendar className="text-purple-300" />
-                        <div className="text-left">
-                          <div className="font-medium">{cls.name}</div>
-                          <div className="text-sm text-purple-200">{cls.time} | Room {cls.room}</div>
+
+              {!classId && (
+                <div className="space-y-4">
+                  <label className="text-purple-200">Select Class</label>
+                  <div className="grid gap-4">
+                    {classes.map((cls) => (
+                      <button
+                        key={cls.id}
+                        className={`p-4 rounded-lg flex items-center justify-between ${
+                          selectedClass?.id === cls.id 
+                            ? 'bg-gradient-to-r from-purple-500 to-blue-500'
+                            : 'bg-purple-900/30 hover:bg-purple-800/30'
+                        } transition-colors`}
+                        onClick={() => setSelectedClass(cls)}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Calendar className="text-purple-300" />
+                          <div className="text-left">
+                            <div className="font-medium">{cls.name}</div>
+                            <div className="text-sm text-purple-200">{cls.time} | Room {cls.room}</div>
+                          </div>
                         </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="space-y-4">
                 <label className="text-purple-200">QR Code Duration</label>
@@ -66,7 +79,6 @@ const QRGenerator = () => {
                 </div>
               </div>
 
-              
               {selectedClass && (
                 <div className="mt-6 p-6 bg-purple-900/30 rounded-lg flex flex-col items-center">
                   <div className="w-64 h-64 bg-white p-4 rounded-lg mb-4">
@@ -86,6 +98,7 @@ const QRGenerator = () => {
                   </div>
                 </div>
               )}
+
             </div>
           </CardContent>
         </Card>

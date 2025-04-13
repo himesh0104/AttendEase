@@ -6,14 +6,17 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "setup": "npm install && npm run db:generate && npm run db:push"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@blackbox-vision/react-qr-reader": "^5.0.0",
-    "@prisma/client": "^6.5.0",
+    "@prisma/client": "^5.10.2",
     "bcryptjs": "^3.0.2",
     "body-parser": "^1.20.3",
     "cloudinary": "^2.6.0",
@@ -29,6 +32,6 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.9",
-    "prisma": "^6.5.0"
+    "prisma": "^5.10.2"
   }
 }

@@ -1,131 +1,126 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
-import { QrCode, Plus, LogOut } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { 
+  QrCode, Plus, LogOut, Copy, Download, Clock, Calendar, 
+  Filter, FileSpreadsheet, Trash2, Edit, CheckSquare, 
+  XSquare, FilePlus, Users, CalendarRange, Maximize, Search,
+  Mail, Send, Bell, CalendarX, CheckCircle, XCircle, AlertTriangle,
+  PieChart as PieChartIcon, BarChart as BarChartIcon, UserX, AlertCircle
+} from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useFaculty } from "@/contexts/FacultyContext";
+import ClassesTab from "@/components/faculty/ClassesTab";
+import AttendanceTab from "@/components/faculty/AttendanceTab";
+import AnalyticsTab from "@/components/faculty/AnalyticsTab";
+import DefaultersTab from "@/components/faculty/DefaultersTab";
+import AnnouncementsTab from "@/components/faculty/AnnouncementsTab";
+import LeaveRequestsTab from "@/components/faculty/LeaveRequestsTab";
 
 const FacultyDashboard = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
-  const [classes, setClasses] = useState([]);
+  const { user, logout } = useAuth();
+  const { loading } = useFaculty();
+  const [activeTab, setActiveTab] = useState("classes");
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const token = localStorage.getItem("token");
+    if (!user) {
+      navigate("/");
+    } else if (user.role !== "FACULTY") {
+      alert("Unauthorized Access");
+      navigate("/");
+    }
+  }, [user, navigate]);
 
-      if (!token) {
-        navigate("/");
-        return;
-      }
-
-      try {
-        const response = await fetch("http://localhost:5000/api/auth/me", {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        const data = await response.json();
-        if (!data.success) {
-          throw new Error(data.msg);
-        }
-
-        setUser(data.user);
-
-        if (data.user.role !== "FACULTY") {
-          alert("Unauthorized Access");
-          navigate("/");
-        }
-
-        // Fetch faculty's classes
-        const classesResponse = await fetch("http://localhost:5000/api/classes", {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        const classesData = await classesResponse.json();
-        setClasses(classesData);
-      } catch (error) {
-        console.error("Error fetching user or classes:", error);
-        localStorage.removeItem("token");
-        navigate("/");
-      }
-    };
-
-    fetchUser();
-  }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/");
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-blue-900 text-white p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex justify-between items-center">
-          <Card className="bg-white/5 backdrop-blur-lg border-white/10 flex-1">
-            <CardContent className="pt-6">
-              <h1 className="text-2xl font-bold">Welcome, {user?.name || "Faculty"}</h1>
-              <p className="text-purple-200">Role: {user?.role || "Unknown"}</p>
-            </CardContent>
-          </Card>
-          
-          <button
-            className="ml-4 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white px-4 py-3 rounded-lg flex items-center justify-center gap-2"
-            onClick={handleLogout}
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-white">Faculty Dashboard</h1>
+            <p className="text-purple-200">Welcome, {user?.name}</p>
+          </div>
+          <Button
+            variant="outline"
+            className="bg-white/10 text-white hover:bg-white/20"
+            onClick={logout}
           >
-            <LogOut size={20} />
+            <LogOut className="w-4 h-4 mr-2" />
             Logout
-          </button>
+          </Button>
         </div>
 
-        <Card className="bg-white/5 backdrop-blur-lg border-white/10">
-          <CardContent className="pt-6">
-            <h2 className="text-xl font-semibold mb-4">Your Classes</h2>
-            {classes.length === 0 ? (
-              <p className="text-purple-300">No classes assigned</p>
-            ) : (
-              <div className="grid md:grid-cols-2 gap-4">
-                {classes.map((cls) => (
-                  <div 
-                    key={cls.id} 
-                    className="bg-white/10 p-4 rounded-lg hover:bg-white/20 transition-all"
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h3 className="font-medium">{cls.name}</h3>
-                        <p className="text-sm text-purple-300">{cls.code}</p>
-                      </div>
-                      <button 
-                        onClick={() => navigate(`/qr-generator/${cls.id}`)}
-                        className="bg-blue-500 hover:bg-blue-600 p-2 rounded-full"
-                      >
-                        <QrCode size={20} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {/* Main Content */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList className="bg-white/10 p-1">
+            <TabsTrigger value="classes" className="text-white data-[state=active]:bg-white/20">
+              <Users className="w-4 h-4 mr-2" />
+              Classes
+            </TabsTrigger>
+            <TabsTrigger value="attendance" className="text-white data-[state=active]:bg-white/20">
+              <CheckSquare className="w-4 h-4 mr-2" />
+              Attendance
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="text-white data-[state=active]:bg-white/20">
+              <PieChartIcon className="w-4 h-4 mr-2" />
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="defaulters" className="text-white data-[state=active]:bg-white/20">
+              <UserX className="w-4 h-4 mr-2" />
+              Defaulters
+            </TabsTrigger>
+            <TabsTrigger value="announcements" className="text-white data-[state=active]:bg-white/20">
+              <Bell className="w-4 h-4 mr-2" />
+              Announcements
+            </TabsTrigger>
+            <TabsTrigger value="leave-requests" className="text-white data-[state=active]:bg-white/20">
+              <CalendarX className="w-4 h-4 mr-2" />
+              Leave Requests
+            </TabsTrigger>
+          </TabsList>
 
-        <Card className="bg-white/5 backdrop-blur-lg border-white/10">
-          <CardContent className="pt-6 text-center">
-            <button
-              onClick={() => navigate("/create-class")}
-              className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white px-6 py-3 rounded-lg flex items-center justify-center gap-2"
-            >
-              <Plus size={24} />
-              Create New Class
-            </button>
-          </CardContent>
-        </Card>
+          <TabsContent value="classes">
+            <ClassesTab />
+          </TabsContent>
+
+          <TabsContent value="attendance">
+            <AttendanceTab />
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <AnalyticsTab />
+          </TabsContent>
+
+          <TabsContent value="defaulters">
+            <DefaultersTab />
+          </TabsContent>
+
+          <TabsContent value="announcements">
+            <AnnouncementsTab />
+          </TabsContent>
+
+          <TabsContent value="leave-requests">
+            <LeaveRequestsTab />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

@@ -1,54 +1,70 @@
 import express from "express";
 import QRCode from "qrcode";
-import prisma from "../prismaClient.js";
+import { prisma } from "../prismaClient.js";
+import { authenticateToken } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/generate", async (req, res) => {
-  console.log("📥 Received request body:", req.body); // Debugging log
+// Apply authentication middleware
+router.use(authenticateToken);
 
-  const { classId, facultyId, courseId, sessionTime } = req.body;
+// Generate QR code for a specific class
+router.post("/faculty/:facultyId/classes/:classId/qr", async (req, res) => {
+  console.log("📥 Received QR code generation request:", {
+    params: req.params,
+    body: req.body
+  });
 
-  // ✅ Validate required fields
-  if (!classId || !facultyId) {
-    console.error("❌ Missing required fields!", req.body);
-    return res.status(400).json({
-      error: "Missing required fields",
-      receivedBody: req.body, // Send back received data for debugging
-    });
-  }
+  const { facultyId, classId } = req.params;
+  const { duration = 15 } = req.body; // Default duration is 15 minutes
 
   try {
-    let sessionToken = null;
-    let sessionId = null;
+    // Verify the class exists and belongs to the faculty
+    const classRecord = await prisma.class.findFirst({
+      where: {
+        id: classId,
+        facultyId
+      }
+    });
 
-    // 🔹 If session details are provided, create a session in the database
-    if (courseId && sessionTime) {
-      sessionToken = `${facultyId}-${courseId}-${Date.now()}`;
-
-      const session = await prisma.session.create({
-        data: {
-          facultyId,
-          courseId,
-          sessionTime,
-          sessionToken,
-          status: "active",
-        },
+    if (!classRecord) {
+      return res.status(404).json({
+        error: "Class not found or does not belong to this faculty"
       });
-
-      sessionId = session.id;
     }
 
-    // 🔹 Generate QR Code
-    const qrData = JSON.stringify({ sessionToken, classId, facultyId });
+    // Create a session token that expires after the specified duration
+    const sessionToken = `${facultyId}-${classId}-${Date.now()}`;
+    const expiryTime = new Date(Date.now() + duration * 60 * 1000); // Convert minutes to milliseconds
+
+    // Create a session record
+    const session = await prisma.session.create({
+      data: {
+        facultyId,
+        courseId: classId, // Using classId as courseId since they represent the same thing
+        sessionTime: expiryTime,
+        sessionToken,
+        status: "active"
+      }
+    });
+
+    // Generate QR Code with session information
+    const qrData = JSON.stringify({
+      sessionToken,
+      classId,
+      facultyId,
+      expiryTime: expiryTime.toISOString()
+    });
+
     const qrCodeUrl = await QRCode.toDataURL(qrData);
 
-    console.log("✅ QR Code generated successfully!");
+    console.log("✅ QR Code generated successfully for class:", classId);
 
     res.json({
       message: "QR Code generated successfully!",
       qrCodeUrl,
-      sessionId,
+      sessionId: session.id,
+      expiryTime: expiryTime.toISOString()
     });
   } catch (error) {
     console.error("❌ QR Code Generation Error:", error);
